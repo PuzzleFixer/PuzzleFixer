@@ -1,0 +1,39 @@
+﻿#pragma kernel ShiftNodes
+
+#include "UnityCG.cginc"
+
+struct Node
+{
+	int id;
+	float size;
+	float3 pos;
+	float4 color;
+};
+
+RWStructuredBuffer<Node> nodeBuffer;
+RWStructuredBuffer<float4> debugBuffer;
+
+CBUFFER_START(Params)
+
+float3 debug;
+int nodeCount;
+
+CBUFFER_END
+
+static const float PI = 3.141593f;
+static const float eps = 0.001f;
+static const float massBasic = 10.0f;
+static const float mu = 0.1f;
+
+
+
+[numthreads(128, 1, 1)]
+void ShiftNodes(uint id : SV_DispatchThreadID)
+{
+	if ((int)id >= nodeCount)
+	{
+		return;
+	}
+
+}
+

@@ -1,0 +1,148 @@
+#pragma kernel CurvesInit
+#pragma kernel CurvesReconstruct
+
+#include "UnityCG.cginc"
+
+RWStructuredBuffer<float4> TangentBuffer;
+RWStructuredBuffer<float4> NormalBuffer;
+RWStructuredBuffer<float4> ColorBuffer;
+RWStructuredBuffer<float3> CurvePointsBuffer;	// output
+RWStructuredBuffer<float3> CurveBuffer;			// input
+StructuredBuffer<int> CurvePointsNumRO;
+StructuredBuffer<float4> CurveEndColorRO;
+RWStructuredBuffer<float4> debugBuffer;
+
+CBUFFER_START(Params)
+
+uint InstanceCount;		// _edgeCount, column
+uint HistoryLength;		// segmentCount, row
+
+CBUFFER_END
+
+static float pi = 3.141593f;
+static float eps = 1e-10;
+
+void NoBundle(uint id)
+{
+	uint idx = id;
+	CurvePointsBuffer[idx] = CurveBuffer[idx];
+	idx += InstanceCount;
+	uint ci = 1;
+	uint controlPointNum = CurvePointsNumRO[id];	// links[i].Length
+	for (ci; ci < min(controlPointNum, HistoryLength); ci++)
+	{
+		CurvePointsBuffer[idx] = CurveBuffer[idx];
+		idx += InstanceCount;
+	}
+	uint lastIdx = idx - InstanceCount;
+	for (ci; ci < HistoryLength; ci++)
+	{
+		CurvePointsBuffer[idx] = CurveBuffer[lastIdx];
+		idx += InstanceCount;
+	}
+}
+
+void ConstructCurvePoints(uint id)
+{
+	// construct curve points using bezier curves
+	// input edge is CurveBuffer[id + (i -> 0 - (CurvePointsNumRO[id]-1)) * InstanceCount], position
+	// output edge is CurvePointsBuffer[id + (i -> 0 - (HistoryLength-1)) * InstanceCount], control points' position
+	float3 startPos = CurveBuffer[id];
+	float3 endPos = CurveBuffer[id + (CurvePointsNumRO[id] - 1) * InstanceCount];
+
+	// curve construct
+	NoBundle(id);
+
+	// lerp the color
+	ColorBuffer[id] = CurveEndColorRO[id];
+	float4 colorBegin = CurveEndColorRO[id];
+	float4 colorEnd = CurveEndColorRO[id + InstanceCount];
+	uint idx = id;
+	for (uint colori = 1; colori < HistoryLength - 1; colori++)
+	{
+		ColorBuffer[idx] = lerp(colorBegin, colorEnd, (float)colori / HistoryLength);
+		idx += InstanceCount;
+	}
+	ColorBuffer[idx] = colorEnd;
+
+	debugBuffer[id] = colorBegin;
+}
+
+void ReconstructTangentNormal(uint id)
+{
+	// Reconstruct the first point.
+	float3 p0 = CurvePointsBuffer[id].xyz;
+	float3 p1 = CurvePointsBuffer[id + InstanceCount].xyz;
+
+	float3 t0 = normalize(p1 - p0);
+	float3 b0 = cross(t0, normalize(p0));
+	float3 n0 = cross(b0, t0);
+
+	TangentBuffer[id] = float4(t0, 0);
+	NormalBuffer[id] = float4(n0, 0);
+
+	// Sequentially reconstruct the points excepting the last one.
+	for (uint i = 1; i < HistoryLength - 1; i++)
+	{
+		uint index = id + i * InstanceCount;
+
+		float3 p0 = CurvePointsBuffer[index - InstanceCount].xyz;
+		float3 p2 = CurvePointsBuffer[index + InstanceCount].xyz;
+
+		float3 t1 = normalize(p2 - p0);
+		float3 n1 = normalize(cross(b0, t1));
+
+		TangentBuffer[index] = float4(t1, 0);
+		NormalBuffer[index] = float4(n1, 0);
+
+		b0 = cross(t1, n1);
+	}
+
+	// Reconstruct the last point.
+	uint index = id + (HistoryLength - 1) * InstanceCount;
+
+	p0 = CurvePointsBuffer[index - InstanceCount].xyz;
+	p1 = CurvePointsBuffer[index].xyz;
+
+	float3 t1 = normalize(p1 - p0);
+	float3 n1 = normalize(cross(b0, t1));
+
+	TangentBuffer[index] = float4(t1, 0);
+	NormalBuffer[index] = float4(n1, 0);
+}
+
+[numthreads(128, 1, 1)]
+// init tangent & normal
+void CurvesInit(uint id : SV_DispatchThreadID)
+{
+	if (id >= InstanceCount)
+	{
+		return;
+	}
+
+	for (uint i = 0; i < HistoryLength; i++)
+	{
+		uint offs = id + i * InstanceCount;
+		TangentBuffer[offs] = float4(0, 0, 1, 0);
+		NormalBuffer[offs] = float4(1, 0, 0, 0);
+		ColorBuffer[offs] = float4(0, 0, 0, 1);
+		CurvePointsBuffer[offs] = float3(0, 0, 0);
+		debugBuffer[offs] = float4(0, 0, 0, 0);
+	}
+}
+
+[numthreads(128, 1, 1)]
+// 1. construct curve points according to node-pair in link (probably will add bundling method)
+// 2. compute the tangent & normal according to position
+void CurvesReconstruct(uint id : SV_DispatchThreadID)
+{
+	if (id < InstanceCount)
+	{
+		/* construct curve points according to node-pair in link */
+		ConstructCurvePoints(id);
+
+		/* compute the tangent & normal according to position */
+		ReconstructTangentNormal(id);
+	}
+
+}

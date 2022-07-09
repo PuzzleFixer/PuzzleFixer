@@ -1,0 +1,16 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+ <filter name="Point Cloud Simplification">
+  <Param value="1000" tooltip="The desired number of samples. The ray of the disk is calculated according to the sampling density." description="Number of samples" type="RichInt" name="SampleNum"/>
+  <Param value="0" tooltip="If not zero this parameter override the previous parameter to allow exact radius specification" description="Explicit Radius" type="RichAbsPerc" min="0" max="5.75802" name="Radius"/>
+  <Param value="true" tooltip="If true it will use a simple heuristic for choosing the samples. At a small cost (it can slow a bit the process) it usually improve the maximality of the generated sampling. " description="Best Sample Heuristic" type="RichBool" name="BestSampleFlag"/>
+  <Param value="10" tooltip="Used only if the Best Sample Flag is true. It control the number of attempt that it makes to get the best sample. It is reasonable that it is smaller than the Montecarlo oversampling factor." description="Best Sample Pool Size" type="RichInt" name="BestSamplePool"/>
+  <Param value="false" tooltip="If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with a tolerance of the 0.5%. Obviously it takes much longer." description="Exact number of samples" type="RichBool" name="ExactNumFlag"/>
+ </filter>
+ <filter name="Surface Reconstruction: Ball Pivoting">
+  <Param value="0" tooltip="The radius of the ball pivoting (rolling) over the set of points. Gaps that are larger than the ball radius will not be filled; similarly the small pits that are smaller than the ball radius will be filled." description="Pivoting Ball radius (0 autoguess)" type="RichAbsPerc" min="0" max="5.73207" name="BallRadius"/>
+  <Param value="20" tooltip="To avoid the creation of too small triangles, if a vertex is found too close to a previous one, it is clustered/merged with it." description="Clustering radius (% of ball radius)" type="RichFloat" name="Clustering"/>
+  <Param value="90" tooltip="If we encounter a crease angle that is too large we should stop the ball rolling" description="Angle Threshold (degrees)" type="RichFloat" name="CreaseThr"/>
+  <Param value="false" tooltip="if true all the initial faces of the mesh are deleted and the whole surface is rebuilt from scratch. Otherwise the current faces are used as a starting point. Useful if you run the algorithm multiple times with an increasing ball radius." description="Delete initial set of faces" type="RichBool" name="DeleteFaces"/>
+ </filter>
+</FilterScript>

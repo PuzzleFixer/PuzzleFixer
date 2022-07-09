@@ -1,0 +1,14 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+ <filter name="Global registration">
+  <Param description="Reference Mesh" tooltip="Reference point-cloud or mesh" value="0" name="refMesh" type="RichMesh"/>
+  <Param description="Target Mesh" tooltip="Point-cloud or mesh to be aligned to the reference" value="1" name="targetMesh" type="RichMesh"/>
+  <Param description="Overlap Ratio" tooltip="Overlap ratio between the two clouds (command line option: -o)" value="50" max="100" name="overlap" type="RichAbsPerc" min="0"/>
+  <Param description="Registration tolerance" tooltip="Tolerance value for the congruent set exploration and LCP computation (command line option: -d)" value="0.1" name="delta" type="RichFloat"/>
+  <Param description="Number of samples" tooltip="Number of samples used in each mesh (command line option: -n)" value="200" name="nbSamples" type="RichInt"/>
+  <Param description="Filter: difference of normal (degrees)" tooltip="Allowed difference of normals allowed between corresponding pairs of points(command line option: -a)" value="-1" name="norm_diff" type="RichFloat"/>
+  <Param description="Filter: difference color" tooltip="Allowed difference of colors allowed between corresponding pairs of points(command line option: -c)" value="-1" name="color_diff" type="RichFloat"/>
+  <Param description="Max. Computation time, in seconds" tooltip="Stop the computation before the end of the exploration (command line option: -t)" value="5" name="max_time_seconds" type="RichInt"/>
+  <Param description="Use Super4PCS" tooltip="When disable, use 4PCS algorithm (command line option: -x" value="true" name="useSuper4PCS" type="RichBool"/>
+ </filter>
+</FilterScript>
