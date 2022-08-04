@@ -55,3 +55,4 @@ Fill in the python.exe path in the file.
 
 - [3D tube by keijiro](https://github.com/keijiro/Swarm)
 - [Museum environment from MuseumVR](https://assetstore.unity.com/packages/3d/environments/museum-vr-complete-edition-89652)
+- [Gargoyle Fragment 3D Data](https://www.geometrie.tuwien.ac.at/geom/nbkdir/hofer/3dpuzzles/gargoyle/gargoyle.html)
