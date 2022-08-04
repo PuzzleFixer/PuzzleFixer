@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DataStructures.ViliWonka.KDTree;
 using UnityEngine;
 
 public class SwitchSkeleton : MonoBehaviour

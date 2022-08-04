@@ -21,7 +21,7 @@ This project shows an example from PuzzleFixer, which demonstrates the workflow 
 - torch
 - chamferdist
 
-Fill in the python.exe path in the file.
+Fill in the system path of "python.exe" into the "pyPath" file in the "PythonUtilities" folder.
 
 ## How to use ##
 
