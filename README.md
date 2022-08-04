@@ -51,3 +51,7 @@ Fill in the python.exe path in the file.
 - finish alignment by clicking Trigger
 - select a candidate and enter next stage by touching a candidate and click Grip button
 
+## Credits ##
+
+- [3D tube by keijiro](https://github.com/keijiro/Swarm)
+- [Museum environment from MuseumVR](https://assetstore.unity.com/packages/3d/environments/museum-vr-complete-edition-89652)
